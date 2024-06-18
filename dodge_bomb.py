@@ -12,20 +12,22 @@ DELTA = {  # 移動量辞書
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-def reverse(kk_img: pg.Rect) -> dict:
+def reverse(kk_img) -> dict:
     """
     引数：こうかとんの写真
     戻り値：辞書
     """
+    #kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0)
+    k_img = pg.transform.flip(kk_img, True, False)
     return {
     (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),  # 左
     (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),  # 左斜め上
     (-5, +5): pg.transform.rotozoom(kk_img, 45, 1.0),  # 左斜め下
-    (0, -5): pg.transform.rotozoom(kk_img, -90, 1.0),   # 上
-    (+5, 0): pg.transform.rotozoom(kk_img, 180, 1.0),  # 右
-    (+5, -5): pg.transform.rotozoom(kk_img, -135, 1.0),  # 右斜め上
-    (+5, +5): pg.transform.rotozoom(kk_img, 180, 1.0),  # 右斜め下
-    (0, +5): pg.transform.rotozoom(kk_img, 90, 1.0),  # 下
+    (0, -5): pg.transform.rotozoom(k_img, 90, 1.0),   # 上
+    (+5, 0): k_img,  # 右
+    (+5, -5): pg.transform.rotozoom(k_img, 45, 1.0),  # 右斜め上
+    (+5, +5): pg.transform.rotozoom(k_img, -45, 1.0),  # 右斜め下
+    (0, +5): pg.transform.rotozoom(k_img, -45, 1.0),  # 下
     }
 
 def check_wh(rct: pg.Rect) -> tuple[bool, bool]:
@@ -80,6 +82,7 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_wh(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+
         
         if sum_mv == [0, 0]:  # 何もキーが押されていない時
             screen.blit(kk_img, kk_rct)
