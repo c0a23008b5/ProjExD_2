@@ -12,6 +12,22 @@ DELTA = {  # 移動量辞書
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def reverse(kk_img: pg.Rect) -> dict:
+    """
+    引数：こうかとんの写真
+    戻り値：辞書
+    """
+    return {
+    (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),  # 左
+    (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),  # 左斜め上
+    (-5, +5): pg.transform.rotozoom(kk_img, 45, 1.0),  # 左斜め下
+    (0, -5): pg.transform.rotozoom(kk_img, -90, 1.0),   # 上
+    (+5, 0): pg.transform.rotozoom(kk_img, 180, 1.0),  # 右
+    (+5, -5): pg.transform.rotozoom(kk_img, -135, 1.0),  # 右斜め上
+    (+5, +5): pg.transform.rotozoom(kk_img, 180, 1.0),  # 右斜め下
+    (0, +5): pg.transform.rotozoom(kk_img, 90, 1.0),  # 下
+    }
+
 def check_wh(rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数:こうかとんrctまたは爆弾rct
@@ -28,10 +44,12 @@ def check_wh(rct: pg.Rect) -> tuple[bool, bool]:
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")    
+    bg_img = pg.image.load("fig/pg_bg.jpg")
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
+
+    kk_images = reverse(kk_img)
     
     bb_img = pg.Surface((20, 20))  # 空のサーフェイスを作る
     bb_img.set_colorkey((0, 0, 0))
@@ -57,17 +75,25 @@ def main():
             if key_lst[k]:
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
+
+        
         kk_rct.move_ip(sum_mv)
         if check_wh(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
-        screen.blit(kk_img, kk_rct)
-    
+        
+        if sum_mv == [0, 0]:  # 何もキーが押されていない時
+            screen.blit(kk_img, kk_rct)
+        else:  # キーが押されている時の方向転換
+            kk_img = kk_images[tuple(sum_mv)]  # reverse関数の辞書にアクセス
+            screen.blit(kk_img, kk_rct)
+
         bb_rct.move_ip(vx, vy)
         yoko, tate = check_wh(bb_rct)
         if not yoko:  # 横方向の反転
             vx *= -1
         if not tate:  # 縦方向の反転
             vy *= -1        
+
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
